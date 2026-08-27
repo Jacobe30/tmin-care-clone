@@ -1,0 +1,5 @@
+{
+  "project_id": "eqiwbvzpxqfhtnantnge",
+  "name": "create_starter_quote_requests",
+  "query": "create table if not exists public.starter_quote_requests (\n  id uuid primary key default gen_random_uuid(),\n  status text not null default 'pending'\n    check (status in ('pending', 'accepted', 'declined')),\n  insurance_type text,\n  vehicle_year integer check (vehicle_year is null or vehicle_year between 1990 and 2030),\n  vehicle_make_model text,\n  vehicle_value numeric(12,2) check (vehicle_value is null or vehicle_value >= 0),\n  usage_purpose text,\n  policy_start_date date,\n  repair_location text,\n  selected_offer jsonb,\n  review_note text,\n  reviewed_at timestamptz,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()\n);\n\ncreate index if not exists starter_quote_requests_status_created_at_idx\n  on public.starter_quote_requests (status, created_at desc);\n\nalter table public.starter_quote_requests enable row level security;\n\ncomment on table public.starter_quote_requests is\n  'Test-only manual-review queue. It deliberately excludes identity, phone, payment, OTP, and national verification data.';"
+}
