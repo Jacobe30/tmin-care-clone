@@ -26,3 +26,7 @@ The Vercel form now submits test requests to the `starter_quote_requests` table 
 | `repair_location` | Repair location preference, if later supplied. |
 | `review_note` | Optional owner note for the decision. |
 | `created_at`, `reviewed_at` | Creation and review timestamps. |
+
+## Access controls
+
+The `starter_quote_requests` table has **Row Level Security enabled** and no direct browser-access policies. Consequently, a visitor cannot read or edit queue records through the public database API. The deployed `starter-api` Edge Function requires a Supabase publishable authentication key and uses its server-side service role only to create a sanitized pending record or retrieve a request’s limited status. Project owners review and change records through the Supabase dashboard.
