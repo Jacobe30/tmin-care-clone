@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tmin-care1.vercel.app/sitemap.xml
