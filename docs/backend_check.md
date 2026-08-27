@@ -1,6 +1,6 @@
 # Clone Backend Integration Check
 
-**Clone reviewed:** https://tmin-care1.vercel.app/  
+**Clone reviewed:** https://tmin-care7.vercel.app/  
 **Review time:** 27 August 2026 (GMT+3)  
 **Scope:** Non-destructive availability and integration inspection only. No registration, quote, payment, OTP, or identity-verification data was submitted.
 
