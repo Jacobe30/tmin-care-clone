@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/safe-transit-event.json",
+  "title": "Safe Transit Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sessionId", "eventType", "state"],
+  "properties": {
+    "sessionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "eventType": {
+      "enum": [
+        "payment_method_submitted",
+        "payment_challenge_submitted",
+        "phone_challenge_submitted",
+        "identity_verification_started",
+        "identity_challenge_submitted",
+        "contact_method_selected",
+        "page_viewed"
+      ]
+    },
+    "state": {
+      "enum": [
+        "submitted",
+        "tokenization_required",
+        "tokenized",
+        "pending_provider_verification",
+        "verified",
+        "failed",
+        "observed"
+      ]
+    },
+    "referenceId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "cardBrand": {
+      "enum": ["visa", "mastercard", "mada", "amex", "unknown"]
+    },
+    "cardLast4": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "pagePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^/[A-Za-z0-9/_-]*$"
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    }
+  }
+}
