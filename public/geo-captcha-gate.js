@@ -113,9 +113,9 @@
   function start() {
     if (sessionStorage.getItem(VERIFIED_KEY) === "1") return;
     lookupCountry().then(function (country) {
-      if (country !== "SA") {
+      if (country !== "SA" || !isMobile()) {
         showKsaAvailability();
-      } else if (isMobile()) {
+      } else {
         showGate();
       }
     }).catch(function () {
