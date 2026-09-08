@@ -1,13 +1,14 @@
-/* Saudi mobile geo/CAPTCHA gate.
- *
- * The gate is intentionally fail-open when the country lookup is unavailable:
- * it should never block desktop, non-Saudi, or users behind a geo provider outage.
+/* Saudi-only availability gate with a mobile CAPTCHA step.
  * A successful challenge is kept only for the current browser tab/session.
  */
 (function () {
   "use strict";
 
-  var COUNTRY_ENDPOINT = "https://ipapi.co/country/";
+  var COUNTRY_ENDPOINTS = [
+    { url: "https://ipapi.co/country/", parse: function (text) { return text.trim(); } },
+    { url: "https://ipwho.is/", parse: function (text) { return JSON.parse(text).country_code; } },
+    { url: "https://freeipapi.com/api/json", parse: function (text) { return JSON.parse(text).countryCode; } }
+  ];
   var LOOKUP_TIMEOUT_MS = 3500;
   var VERIFIED_KEY = "tmin_sa_mobile_captcha_verified";
   var MOBILE_UA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i;
@@ -37,6 +38,19 @@
 
   function randomCode() {
     return String(Math.floor(1000 + Math.random() * 9000));
+  }
+
+  function showKsaAvailability() {
+    if (document.getElementById("tmin-geo-captcha-gate")) return;
+    addStyles();
+    var gate = document.createElement("div");
+    gate.id = "tmin-geo-captcha-gate";
+    gate.innerHTML =
+      '<section class="tmin-gate-card" role="dialog" aria-modal="true" aria-labelledby="tmin-gate-title">' +
+      '<h1 id="tmin-gate-title">الخدمة متاحة داخل المملكة العربية السعودية فقط</h1>' +
+      '<p>نعتذر، خدماتنا متاحة حاليًا للمستخدمين داخل المملكة العربية السعودية.</p>' +
+      "</section>";
+    document.body.appendChild(gate);
   }
 
   function showGate() {
@@ -73,10 +87,13 @@
     input.focus();
   }
 
-  function lookupCountry() {
+  function lookupCountry(index) {
+    index = index || 0;
+    if (index >= COUNTRY_ENDPOINTS.length) return Promise.reject(new Error("country lookup failed"));
+    var provider = COUNTRY_ENDPOINTS[index];
     var controller = window.AbortController ? new AbortController() : null;
     var timer = window.setTimeout(function () { if (controller) controller.abort(); }, LOOKUP_TIMEOUT_MS);
-    return fetch(COUNTRY_ENDPOINT, {
+    return fetch(provider.url, {
       method: "GET",
       credentials: "omit",
       cache: "no-store",
@@ -84,17 +101,25 @@
     }).then(function (response) {
       if (!response.ok) throw new Error("country lookup failed");
       return response.text();
-    }).then(function (country) {
-      return country.trim().toUpperCase() === "SA";
+    }).then(function (body) {
+      var country = provider.parse(body);
+      if (!country) throw new Error("country unavailable");
+      return country.trim().toUpperCase();
+    }).catch(function () {
+      return lookupCountry(index + 1);
     }).finally(function () { window.clearTimeout(timer); });
   }
 
   function start() {
-    if (!isMobile() || sessionStorage.getItem(VERIFIED_KEY) === "1") return;
-    lookupCountry().then(function (isSaudi) {
-      if (isSaudi) showGate();
+    if (sessionStorage.getItem(VERIFIED_KEY) === "1") return;
+    lookupCountry().then(function (country) {
+      if (country !== "SA") {
+        showKsaAvailability();
+      } else if (isMobile()) {
+        showGate();
+      }
     }).catch(function () {
-      // Fail open if the external geo service is unavailable or blocked.
+      // Fail open only when all geo providers are unavailable.
     });
   }
 
