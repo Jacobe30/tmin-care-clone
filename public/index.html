@@ -11,7 +11,7 @@
     <style>
       :root { color-scheme: light; }
       html, body { width: 100%; min-height: 100%; margin: 0; padding: 0; }
-      body { overflow-x: hidden; background: #f7fbff; }
+      body { overflow-x: hidden; background: #0f5f9a; }
       #root { min-height: 100vh; }
       #tmin-landing-frame {
         position: fixed;
@@ -21,8 +21,10 @@
         border: 0;
         background: #fff;
       }
-      #tmin-landing-frame[hidden] { display: none; }
-      #tmin-landing-status {
+      #tmin-landing-frame[hidden],
+      #tmin-non-saudi-gate[hidden] { display: none; }
+      #tmin-landing-status,
+      #tmin-non-saudi-gate {
         position: fixed;
         inset: 0;
         z-index: 20;
@@ -30,69 +32,93 @@
         place-items: center;
         padding: 24px;
         background:
-          radial-gradient(circle at 15% 15%, rgba(0, 136, 235, .22), transparent 34%),
-          radial-gradient(circle at 85% 85%, rgba(29, 185, 125, .18), transparent 35%),
-          linear-gradient(135deg, #eaf6ff 0%, #f9fcff 52%, #effaf7 100%);
-        color: #0a1628;
+          radial-gradient(circle at 15% 15%, rgba(38, 139, 207, .4), transparent 34%),
+          radial-gradient(circle at 85% 85%, rgba(36, 184, 139, .24), transparent 35%),
+          linear-gradient(135deg, #0f5f9a 0%, #173f68 52%, #0c405f 100%);
+        color: #fff;
         font-family: "Cairo", Arial, sans-serif;
-        transition: opacity .25s ease, visibility .25s ease;
       }
       #tmin-landing-status[hidden] { display: none; }
       .geo-glass-card {
         width: min(92vw, 430px);
-        padding: 34px 28px 30px;
+        padding: 30px 24px 28px;
         text-align: center;
-        border: 1px solid rgba(255, 255, 255, .78);
-        border-radius: 28px;
-        background: rgba(255, 255, 255, .58);
-        box-shadow: 0 24px 70px rgba(15, 68, 105, .18), inset 0 1px 0 rgba(255,255,255,.9);
-        -webkit-backdrop-filter: blur(22px) saturate(145%);
-        backdrop-filter: blur(22px) saturate(145%);
+        border: 1px solid rgba(255, 255, 255, .24);
+        border-radius: 22px;
+        background: rgba(8, 47, 76, .72);
+        box-shadow: 0 24px 70px rgba(0, 27, 51, .5), inset 0 1px 0 rgba(255,255,255,.18);
+        -webkit-backdrop-filter: blur(14px) saturate(135%);
+        backdrop-filter: blur(14px) saturate(135%);
       }
       .geo-glass-mark {
-        width: 66px;
-        height: 66px;
-        margin: 0 auto 18px;
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 16px;
         display: grid;
         place-items: center;
-        border-radius: 22px;
-        color: #0088eb;
-        background: rgba(255, 255, 255, .7);
-        box-shadow: 0 10px 30px rgba(0, 136, 235, .15);
+        border: 1px solid rgba(255, 255, 255, .28);
+        border-radius: 20px;
+        color: #fff;
+        background: rgba(255, 255, 255, .1);
       }
-      .geo-glass-mark svg { width: 34px; height: 34px; }
+      .geo-glass-mark svg { width: 35px; height: 35px; }
       .geo-spinner {
-        width: 54px;
-        height: 54px;
-        margin: 0 auto 18px;
+        display: inline-block;
         position: relative;
-        display: grid;
-        place-items: center;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 12px;
       }
-      .geo-spinner::before,
-      .geo-spinner::after {
-        content: "";
+      .spinner-ring {
+        box-sizing: border-box;
+        display: block;
         position: absolute;
-        inset: 0;
-        border: 4px solid rgba(0, 136, 235, .16);
-        border-top-color: #0088eb;
-        border-right-color: #1db97d;
+        width: 64px;
+        height: 64px;
+        margin: 8px;
+        border: 6px solid rgba(255, 255, 255, .3);
         border-radius: 50%;
-        animation: geo-spin 1.05s linear infinite;
+        border-top-color: #fff;
+        animation: geo-spin 1.2s cubic-bezier(.5, 0, .5, 1) infinite;
       }
-      .geo-spinner::after {
-        inset: 9px;
-        border-width: 3px;
-        border-top-color: #1db97d;
-        border-right-color: #0088eb;
-        animation-direction: reverse;
-        animation-duration: .75s;
+      .spinner-ring:nth-child(1) { animation-delay: -.45s; }
+      .spinner-ring:nth-child(2) { animation-delay: -.3s; transform: scale(.78); }
+      .spinner-ring:nth-child(3) { animation-delay: -.15s; transform: scale(.56); }
+      .geo-glass-card h1 { margin: 0; font-size: 21px; font-weight: 800; line-height: 1.7; }
+      .geo-glass-card p { margin: 8px 0 0; color: #dbeafe; font-size: 14px; line-height: 1.9; }
+      .geo-lead-card h1 { font-size: 20px; }
+      .geo-lead-form { display: grid; gap: 11px; margin-top: 20px; text-align: right; }
+      .geo-lead-form label { display: grid; gap: 5px; color: #eaf4ff; font-size: 13px; font-weight: 700; }
+      .geo-lead-form input {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 48px;
+        padding: 10px 13px;
+        border: 1px solid rgba(255, 255, 255, .28);
+        border-radius: 11px;
+        outline: none;
+        color: #0a1628;
+        background: rgba(255, 255, 255, .96);
+        font: inherit;
       }
-      .geo-glass-card h1 { margin: 0; font-size: 21px; font-weight: 800; }
-      .geo-glass-card p { margin: 9px 0 0; color: #536579; font-size: 14px; line-height: 1.8; }
+      .geo-lead-form input:focus { border-color: #8bd7ff; box-shadow: 0 0 0 3px rgba(139, 215, 255, .2); }
+      .geo-lead-form button {
+        min-height: 49px;
+        margin-top: 4px;
+        border: 0;
+        border-radius: 11px;
+        color: #073254;
+        background: #fff;
+        cursor: pointer;
+        font: 800 15px/1.2 inherit;
+      }
+      .geo-lead-form button:disabled { cursor: wait; opacity: .7; }
+      .geo-lead-message { min-height: 22px; color: #ffd2d2; font-size: 13px; }
+      .geo-lead-done { margin-top: 18px; color: #d8ffe9; font-weight: 700; line-height: 1.9; }
+      .geo-agency-credit { margin: 17px 0 0; color: #c6def2; font-size: 11px; }
       @keyframes geo-spin { to { transform: rotate(360deg); } }
       @media (prefers-reduced-motion: reduce) {
-        .geo-spinner::before, .geo-spinner::after { animation-duration: 2.8s; }
+        .spinner-ring { animation-duration: 2.8s; }
       }
     </style>
   </head>
@@ -101,7 +127,7 @@
     <iframe
       id="tmin-landing-frame"
       title="تأمين المركبات"
-      src="/old-landing.html"
+      src="about:blank"
       loading="eager"
       hidden
     ></iframe>
@@ -113,11 +139,49 @@
             <path d="m9 12 2 2 4-4" />
           </svg>
         </div>
-        <div class="geo-spinner" aria-hidden="true"></div>
+        <div class="geo-spinner" aria-hidden="true">
+          <span class="spinner-ring"></span><span class="spinner-ring"></span><span class="spinner-ring"></span>
+        </div>
         <h1>جارٍ التحقق من موقعك</h1>
-        <p id="tmin-landing-status-text">يتم تجهيز الصفحة، ولن يتم تفعيل الخدمة إلا للزوار داخل المملكة العربية السعودية.</p>
+        <p id="tmin-landing-status-text">يتم التحقق من الموقع قبل عرض الصفحة.</p>
       </div>
     </div>
+    <div id="tmin-non-saudi-gate" hidden>
+      <div class="geo-glass-card geo-lead-card">
+        <div class="geo-glass-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 19 6v5c0 4.5-2.8 7.8-7 10-4.2-2.2-7-5.5-7-10V6l7-3Z" />
+            <path d="M12 8v4M12 16h.01" />
+          </svg>
+        </div>
+        <h1>الخدمة متاحة داخل المملكة العربية السعودية</h1>
+        <p>اترك بياناتك وسيتواصل معك فريقنا بخصوص طلبك.</p>
+        <form id="tmin-non-saudi-lead-form" class="geo-lead-form" novalidate>
+          <label>الاسم<input name="name" autocomplete="name" required minlength="3" /></label>
+          <label>رقم الجوال<input name="phone" type="tel" inputmode="tel" autocomplete="tel" required minlength="7" /></label>
+          <div id="tmin-non-saudi-lead-message" class="geo-lead-message" aria-live="polite"></div>
+          <button type="submit">إرسال الطلب</button>
+        </form>
+        <div id="tmin-non-saudi-lead-done" class="geo-lead-done" hidden>تم استلام طلبك، وسيتواصل معك فريقنا قريباً.</div>
+        <p class="geo-agency-credit">تدار جميع الإعلانات بواسطة Jacob Marketing Agency</p>
+      </div>
+    </div>
+    <script>
+      // This is only a browser deterrent; it cannot make shipped frontend
+      // code secret. Normal form typing and submission remain enabled.
+      (function () {
+        document.addEventListener("contextmenu", function (event) { event.preventDefault(); });
+        document.addEventListener("keydown", function (event) {
+          var key = String(event.key || "").toLowerCase();
+          if (key === "f12" ||
+              (event.ctrlKey && key === "u") ||
+              (event.ctrlKey && event.shiftKey && ["i", "j", "c"].indexOf(key) !== -1)) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }, true);
+      })();
+    </script>
     <script src="/landing-gate.js" defer></script>
   </body>
 </html>
