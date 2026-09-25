@@ -26,38 +26,27 @@
         position: fixed;
         inset: 0;
         z-index: 50;
-        display: grid;
-        place-items: center;
-        background: rgba(237, 244, 254, .24);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(219, 234, 254, .5);
         pointer-events: auto;
         cursor: wait;
-        -webkit-backdrop-filter: blur(1px) saturate(105%);
-        backdrop-filter: blur(1px) saturate(105%);
       }
       #tmin-non-saudi-spinner[hidden] { display: none; }
-      .permanent-glass-spinner {
-        position: relative;
-        width: 32px;
-        height: 32px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
+      #tmin-non-saudi-spinner .text-center { text-align: center; }
+      #tmin-non-saudi-spinner .mb-6 { margin-bottom: 1.5rem; }
+      #tmin-non-saudi-spinner .mb-4 { margin-bottom: 1rem; }
+      #tmin-non-saudi-spinner .animate-spin {
+        width: 3rem;
+        height: 3rem;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 9999px;
+        border-bottom: 2px solid oklch(0.208 0.042 265.755);
+        animation: zip-dB-spin 1s linear infinite;
       }
-      .permanent-glass-spinner::before,
-      .permanent-glass-spinner::after {
-        content: "";
-        position: absolute;
-        width: 28px;
-        height: 28px;
-        border: 2px solid rgba(75, 151, 206, .16);
-        border-top-color: #28a8db;
-        border-radius: 50%;
-        animation: lovable-reference-spin 1s linear infinite;
-      }
-      .permanent-glass-spinner::after {
-        display: none;
-      }
-      @keyframes lovable-reference-spin { to { transform: rotate(360deg); } }
+      @keyframes zip-dB-spin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
@@ -69,7 +58,12 @@
       loading="eager"
     ></iframe>
     <div id="tmin-non-saudi-spinner" aria-hidden="true">
-      <div class="permanent-glass-spinner"></div>
+      <div class="text-center">
+        <div class="mb-6"></div>
+        <div class="mb-4">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </div>
     </div>
     <script>
       // Browser-side deterrent only; frontend files delivered to a browser
