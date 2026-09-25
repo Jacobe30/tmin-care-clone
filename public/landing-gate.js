@@ -9,6 +9,7 @@
   var nonSaudiSpinner = document.getElementById("tmin-non-saudi-spinner");
   var countryDecision = null;
   var waitingForStart = false;
+  var pendingLeadScroll = false;
   var flowLoaded = false;
   var currentScript = null;
 
@@ -62,9 +63,26 @@
     return "/old-landing.html" + query;
   }
 
+  function scrollUnderlayToLead() {
+    pendingLeadScroll = true;
+    if (!frame || !frame.contentWindow) return;
+    frame.contentWindow.postMessage({ type: "tmin-scroll-to-lead" }, "*");
+    window.setTimeout(function () {
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: "tmin-scroll-to-lead" }, "*");
+      }
+      pendingLeadScroll = false;
+    }, 250);
+  }
+
   function showLanding(decision) {
     if (!frame) return;
     frame.hidden = false;
+    if (!decision.allowed) {
+      frame.onload = function () {
+        if (pendingLeadScroll) scrollUnderlayToLead();
+      };
+    }
     frame.src = frameUrl(decision);
     // The spinner is deliberately non-blocking: the page remains normal and
     // clickable underneath it, but the overlay stays forever for non-Saudi.
@@ -103,6 +121,14 @@
     }
     if (!countryDecision.allowed) return;
     loadCustomerFlow(true);
+  }
+
+  if (nonSaudiSpinner) {
+    nonSaudiSpinner.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      scrollUnderlayToLead();
+    });
   }
 
   window.addEventListener("message", function (event) {
