@@ -1,3 +1,12 @@
+User-agent: Googlebot
+Allow: /privacy
+
+User-agent: AdsBot-Google
+Allow: /privacy
+
+User-agent: Google-InspectionTool
+Allow: /privacy
+
 User-agent: *
 Allow: /
-Sitemap: https://tmin-care7.vercel.app/sitemap.xml
+Sitemap: https://treegosksa.vercel.app/sitemap.xml
