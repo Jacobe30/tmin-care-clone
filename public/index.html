@@ -28,45 +28,36 @@
         z-index: 50;
         display: grid;
         place-items: center;
-        background: rgba(255, 255, 255, .08);
+        background: rgba(237, 244, 254, .24);
         pointer-events: auto;
         cursor: wait;
-        -webkit-backdrop-filter: blur(5px) saturate(115%);
-        backdrop-filter: blur(5px) saturate(115%);
+        -webkit-backdrop-filter: blur(1px) saturate(105%);
+        backdrop-filter: blur(1px) saturate(105%);
       }
       #tmin-non-saudi-spinner[hidden] { display: none; }
       .permanent-glass-spinner {
-        width: 112px;
-        height: 112px;
+        position: relative;
+        width: 32px;
+        height: 32px;
         display: grid;
         place-items: center;
-        border: 1px solid rgba(255, 255, 255, .62);
-        border-radius: 28px;
-        background: rgba(255, 255, 255, .24);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, .16), inset 0 1px 0 rgba(255, 255, 255, .72);
-        -webkit-backdrop-filter: blur(18px) saturate(135%);
-        backdrop-filter: blur(18px) saturate(135%);
+        border-radius: 50%;
       }
       .permanent-glass-spinner::before,
       .permanent-glass-spinner::after {
         content: "";
         position: absolute;
-        width: 66px;
-        height: 66px;
-        border: 6px solid rgba(255, 255, 255, .42);
-        border-top-color: #fff;
+        width: 28px;
+        height: 28px;
+        border: 2px solid rgba(75, 151, 206, .16);
+        border-top-color: #28a8db;
         border-radius: 50%;
-        animation: permanent-white-spin 1.2s cubic-bezier(.5, 0, .5, 1) infinite;
+        animation: lovable-reference-spin 1s linear infinite;
       }
       .permanent-glass-spinner::after {
-        width: 44px;
-        height: 44px;
-        border-width: 4px;
-        border-top-color: rgba(255, 255, 255, .98);
-        animation-direction: reverse;
-        animation-duration: .82s;
+        display: none;
       }
-      @keyframes permanent-white-spin { to { transform: rotate(360deg); } }
+      @keyframes lovable-reference-spin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
