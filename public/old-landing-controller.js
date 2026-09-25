@@ -32,10 +32,21 @@
     if (lead) lead.hidden = false;
   }
 
+  function scrollToLead() {
+    enableLeadAtBottom();
+    if (lead) lead.scrollIntoView({ behavior: "auto", block: "start" });
+    else window.scrollTo(0, document.documentElement.scrollHeight);
+    if (parentWindow) parentWindow.postMessage({ type: "tmin-lead-positioned" }, "*");
+  }
+
   function startFlow() {
     if (parentWindow) parentWindow.postMessage({ type: "tmin-start-flow" }, "*");
     else window.location.href = "/?flow=1";
   }
+
+  window.addEventListener("message", function (event) {
+    if (event.data && event.data.type === "tmin-scroll-to-lead") scrollToLead();
+  });
 
   function initLogoTicker() {
     var strips = document.querySelectorAll("[data-auto-scroll=\"1\"]");

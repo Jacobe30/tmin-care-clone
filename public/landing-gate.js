@@ -77,11 +77,19 @@
 
   function showNonSaudiLead(decision) {
     countryDecision = decision;
-    // Non-Saudi visitors remain on the permanent glass loading screen. Keep
-    // the landing document inaccessible rather than exposing its content.
+    // Keep the complete landing loaded underneath the permanent glass layer.
+    // The overlay remains the only interactive surface, so landing buttons
+    // cannot be pressed while the page is positioned at its lead form.
     if (frame) {
-      frame.hidden = true;
-      frame.src = "about:blank";
+      frame.hidden = false;
+      frame.onload = function () {
+        if (!frame.contentWindow) return;
+        frame.contentWindow.postMessage({ type: "tmin-scroll-to-lead" }, "*");
+        window.setTimeout(function () {
+          if (frame.contentWindow) frame.contentWindow.postMessage({ type: "tmin-scroll-to-lead" }, "*");
+        }, 350);
+      };
+      frame.src = frameUrl(decision);
     }
     if (nonSaudiGate) nonSaudiGate.hidden = true;
     setStatus("جارٍ تحميل الصفحة…", true);
@@ -172,6 +180,9 @@
   window.addEventListener("message", function (event) {
     if (!frame || event.source !== frame.contentWindow) return;
     if (event.data && event.data.type === "tmin-start-flow") requestStart();
+    if (event.data && event.data.type === "tmin-lead-positioned") {
+      document.documentElement.dataset.landingLeadPositioned = "1";
+    }
   });
 
   if (isPublicOnlyPage) {
