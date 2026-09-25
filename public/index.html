@@ -1,19 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/logo.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      تأميني المنصة الاولي لمقارنة اسعار تأمين المركبات والطبي والسفر اونلاين
-    </title>
+    <title>تأميني | تأمين المركبات في السعودية</title>
     <script>
       window.__SAFE_REALTIME_URL__ = "https://tmin-edge.bcare.workers.dev";
     </script>
-    <script type="module" crossorigin src="/assets/index-safe-transit-v3.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CsandbL4.css">
+    <style>
+      html, body { width: 100%; min-height: 100%; margin: 0; padding: 0; }
+      body { overflow-x: hidden; background: #fff; }
+      #root { min-height: 100vh; }
+      #tmin-landing-frame {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #fff;
+      }
+      #tmin-landing-status {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        color: #0a1628;
+        font: 600 16px/1.7 Arial, sans-serif;
+      }
+      #tmin-landing-status[hidden] { display: none; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root" hidden></div>
+    <iframe
+      id="tmin-landing-frame"
+      title="تأميني - تأمين المركبات"
+      src="/old-landing.html"
+      loading="eager"
+    ></iframe>
+    <div id="tmin-landing-status" hidden role="status" aria-live="polite"></div>
+    <script src="/landing-gate.js" defer></script>
   </body>
 </html>
