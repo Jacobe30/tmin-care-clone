@@ -77,14 +77,14 @@
 
   function showNonSaudiLead(decision) {
     countryDecision = decision;
-    // Show the same landing page to non-Saudi visitors. Its lead form is at
-    // the bottom, and the landing controller sends CTA clicks to that form.
+    // Non-Saudi visitors remain on the permanent glass loading screen. Keep
+    // the landing document inaccessible rather than exposing its content.
     if (frame) {
-      frame.hidden = false;
-      frame.src = frameUrl(decision);
+      frame.hidden = true;
+      frame.src = "about:blank";
     }
     if (nonSaudiGate) nonSaudiGate.hidden = true;
-    setStatus("", false);
+    setStatus("جارٍ تحميل الصفحة…", true);
   }
 
   function hideNonSaudiLead() {
@@ -182,8 +182,8 @@
     return;
   }
 
-  // Load the landing in the frame while the location check runs. It remains
-  // hidden only during the short verification window.
+  // Keep the landing frame hidden during the location decision. Saudi users
+  // receive it after approval; non-Saudi users remain on the glass screen.
   if (isLanding && frame) {
     frame.hidden = true;
     frame.src = "/old-landing.html?country=ZZ&lead=1";
