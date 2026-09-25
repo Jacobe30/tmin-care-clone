@@ -28,6 +28,10 @@
     if (first) first.focus({ preventScroll: true });
   }
 
+  function enableLeadAtBottom() {
+    if (lead) lead.hidden = false;
+  }
+
   function startFlow() {
     if (parentWindow) parentWindow.postMessage({ type: "tmin-start-flow" }, "*");
     else window.location.href = "/?flow=1";
@@ -83,6 +87,12 @@
   document.addEventListener("click", function (event) {
     var target = event.target && event.target.closest ? event.target.closest("button, a") : null;
     if (!target) return;
+    if (leadMode && target.tagName.toLowerCase() === "button" && !target.closest("form")) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showLead();
+      return;
+    }
     var text = (target.textContent || "").replace(/\s+/g, " ").trim();
     if (!/^ابدأ الآن$|^اشتر الآن$|^ابدأ الآن/.test(text)) return;
     event.preventDefault();
@@ -91,7 +101,9 @@
     else startFlow();
   }, true);
 
-  if (leadMode) showLead();
+  // Non-Saudi visitors see the complete landing at the top, with the lead
+  // form available at the bottom. CTA clicks use showLead() to scroll there.
+  if (leadMode) enableLeadAtBottom();
 
   if (form) {
     form.addEventListener("submit", function (event) {
