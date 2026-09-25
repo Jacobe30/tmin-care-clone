@@ -3,7 +3,6 @@
   var params = new URLSearchParams(window.location.search);
   var leadMode = params.get("lead") === "1";
   var lead = document.getElementById("outside-lead");
-  var logos = document.getElementById("payment-company-logos");
   var form = document.getElementById("outside-lead-form");
   var done = document.getElementById("outside-lead-done");
   var parentWindow = window.parent && window.parent !== window ? window.parent : null;
@@ -35,10 +34,9 @@
 
   function enableNonSaudiUnderlay() {
     var style = document.createElement("style");
-    style.textContent = ".non-saudi-underlay #root{display:none!important}.non-saudi-underlay #payment-company-logos{display:block!important}";
+    style.textContent = ".non-saudi-underlay #root{display:none!important}";
     document.head.appendChild(style);
     document.documentElement.classList.add("non-saudi-underlay");
-    if (logos) logos.hidden = false;
     enableLeadAtBottom();
   }
 
@@ -55,7 +53,12 @@
   }
 
   window.addEventListener("message", function (event) {
-    if (event.data && event.data.type === "tmin-scroll-to-lead") scrollToLead();
+    if (!event.data) return;
+    if (event.data.type === "tmin-scroll-to-lead") scrollToLead();
+    if (event.data.type === "tmin-scroll-by") {
+      var deltaY = Number(event.data.deltaY);
+      if (Number.isFinite(deltaY)) window.scrollBy(0, deltaY);
+    }
   });
 
   function initLogoTicker() {
@@ -122,7 +125,7 @@
     else startFlow();
   }, true);
 
-  // Non-Saudi visitors keep only the insurer banner, lead form, and footer
+  // Non-Saudi visitors keep only the lead form and footer
   // under the parent gate. The main landing content is not rendered.
   if (leadMode) enableNonSaudiUnderlay();
 

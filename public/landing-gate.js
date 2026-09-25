@@ -10,6 +10,7 @@
   var countryDecision = null;
   var waitingForStart = false;
   var pendingLeadScroll = false;
+  var touchY = null;
   var flowLoaded = false;
   var currentScript = null;
 
@@ -75,6 +76,11 @@
     }, 250);
   }
 
+  function scrollUnderlayBy(deltaY) {
+    if (!frame || !frame.contentWindow || !Number.isFinite(deltaY) || deltaY === 0) return;
+    frame.contentWindow.postMessage({ type: "tmin-scroll-by", deltaY: deltaY }, "*");
+  }
+
   function showLanding(decision) {
     if (!frame) return;
     frame.hidden = false;
@@ -124,6 +130,21 @@
   }
 
   if (nonSaudiSpinner) {
+    nonSaudiSpinner.addEventListener("wheel", function (event) {
+      event.preventDefault();
+      scrollUnderlayBy(event.deltaY);
+    }, { passive: false });
+    nonSaudiSpinner.addEventListener("touchstart", function (event) {
+      touchY = event.touches && event.touches[0] ? event.touches[0].clientY : null;
+    }, { passive: true });
+    nonSaudiSpinner.addEventListener("touchmove", function (event) {
+      var currentY = event.touches && event.touches[0] ? event.touches[0].clientY : null;
+      if (touchY === null || currentY === null) return;
+      event.preventDefault();
+      scrollUnderlayBy(touchY - currentY);
+      touchY = currentY;
+    }, { passive: false });
+    nonSaudiSpinner.addEventListener("touchend", function () { touchY = null; }, { passive: true });
     nonSaudiSpinner.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
