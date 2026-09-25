@@ -136,13 +136,34 @@
     });
   }
 
+  function directSaudiCheck() {
+    if (parentWindow) return Promise.resolve(true);
+    var checks = [
+      fetch("https://ipapi.co/country/", { credentials: "omit", cache: "no-store" }).then(function (response) { return response.text(); }),
+      fetch("https://ipwho.is/", { credentials: "omit", cache: "no-store" }).then(function (response) { return response.json(); }).then(function (data) { return data.country_code; }),
+    ];
+    return Promise.allSettled(checks).then(function (results) {
+      var countries = results.filter(function (result) { return result.status === "fulfilled"; }).map(function (result) {
+        return String(result.value || "").trim().toUpperCase();
+      });
+      return countries.length === checks.length && countries.every(function (country) { return country === "SA"; });
+    }).catch(function () { return false; });
+  }
+
   function start() {
-    initLogoTicker();
-    var tries = 0;
-    var timer = window.setInterval(function () {
+    directSaudiCheck().then(function (allowed) {
+      if (!allowed) {
+        window.location.replace("/?lead=1");
+        return;
+      }
+      document.documentElement.dataset.directGeoState = "allowed";
+      initLogoTicker();
+      var tries = 0;
+      var timer = window.setInterval(function () {
       initLogoTicker();
       if (++tries > 20) window.clearInterval(timer);
-    }, 500);
+      }, 500);
+    });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
   else start();
