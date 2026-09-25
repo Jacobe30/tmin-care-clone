@@ -2,26 +2,15 @@
   "use strict";
 
   var path = window.location.pathname.replace(/\/+$/, "") || "/";
-  var params = new URLSearchParams(window.location.search);
   var isLanding = path === "/";
   var isPublicOnlyPage = /^(\/privacy|\/robots\.txt|\/sitemap\.xml)$/.test(path);
   var root = document.getElementById("root");
   var frame = document.getElementById("tmin-landing-frame");
-  var status = document.getElementById("tmin-landing-status");
-  var statusText = document.getElementById("tmin-landing-status-text");
-  var nonSaudiGate = document.getElementById("tmin-non-saudi-gate");
-  var leadForm = document.getElementById("tmin-non-saudi-lead-form");
-  var leadMessage = document.getElementById("tmin-non-saudi-lead-message");
-  var leadDone = document.getElementById("tmin-non-saudi-lead-done");
+  var nonSaudiSpinner = document.getElementById("tmin-non-saudi-spinner");
   var countryDecision = null;
   var waitingForStart = false;
   var flowLoaded = false;
   var currentScript = null;
-
-  function setStatus(message, visible) {
-    if (statusText) statusText.textContent = message || "";
-    if (status) status.hidden = !visible;
-  }
 
   function timeoutFetch(url, parser) {
     var controller = window.AbortController ? new AbortController() : null;
@@ -56,8 +45,6 @@
       var countries = results
         .filter(function (result) { return result.status === "fulfilled"; })
         .map(function (result) { return result.value; });
-      // Fail closed: the customer landing is admitted only when both signals
-      // succeed and agree that the visitor is in Saudi Arabia.
       if (!countries.length) return { allowed: false, country: "ZZ", reason: "unavailable", signals: 0 };
       var allSaudi = countries.length === checks.length && countries.every(function (country) { return country === "SA"; });
       return {
@@ -75,70 +62,18 @@
     return "/old-landing.html" + query;
   }
 
-  function showNonSaudiLead(decision) {
-    countryDecision = decision;
-    // Keep the complete landing loaded underneath the permanent glass layer.
-    // The overlay remains the only interactive surface, so landing buttons
-    // cannot be pressed while the page is positioned at its lead form.
-    if (frame) {
-      frame.hidden = false;
-      frame.onload = function () {
-        if (!frame.contentWindow) return;
-        frame.contentWindow.postMessage({ type: "tmin-scroll-to-lead" }, "*");
-        window.setTimeout(function () {
-          if (frame.contentWindow) frame.contentWindow.postMessage({ type: "tmin-scroll-to-lead" }, "*");
-        }, 350);
-      };
-      frame.src = frameUrl(decision);
-    }
-    if (nonSaudiGate) nonSaudiGate.hidden = true;
-    setStatus("جارٍ تحميل الصفحة…", true);
-  }
-
-  function hideNonSaudiLead() {
-    if (nonSaudiGate) nonSaudiGate.hidden = true;
-    if (leadMessage) leadMessage.textContent = "";
-  }
-
-  function submitLead(event) {
-    event.preventDefault();
-    if (!leadForm) return;
-    var name = leadForm.querySelector('[name="name"]');
-    var phone = leadForm.querySelector('[name="phone"]');
-    var button = leadForm.querySelector("button");
-    var nameValue = name ? name.value.trim() : "";
-    var phoneValue = phone ? phone.value.trim() : "";
-    if (nameValue.length < 3 || phoneValue.length < 7) {
-      if (leadMessage) leadMessage.textContent = "الاسم ورقم الجوال مطلوبان للمتابعة.";
-      if (nameValue.length < 3 && name) name.focus();
-      else if (phone) phone.focus();
-      return;
-    }
-    if (leadMessage) leadMessage.textContent = "";
-    if (button) { button.disabled = true; button.textContent = "جارٍ الإرسال…"; }
-    var controller = window.AbortController ? new AbortController() : null;
-    var timer = window.setTimeout(function () { if (controller) controller.abort(); }, 10000);
-    fetch("https://tmin-edge.bcare.workers.dev/reg", {
-      method: "POST",
-      mode: "cors",
-      credentials: "omit",
-      headers: { "content-type": "application/json" },
-      signal: controller ? controller.signal : undefined,
-      body: JSON.stringify({ source: "lead", stage: "lead", name: nameValue, phone: phoneValue, page: "/" }),
-    }).then(function (response) {
-      if (!response.ok) throw new Error("lead_submit_failed");
-      leadForm.hidden = true;
-      if (leadDone) leadDone.hidden = false;
-    }).catch(function () {
-      if (leadMessage) leadMessage.textContent = "تعذّر إرسال الطلب حالياً. حاول مرة أخرى بعد قليل.";
-      if (button) { button.disabled = false; button.textContent = "إرسال الطلب"; }
-    }).finally(function () { window.clearTimeout(timer); });
+  function showLanding(decision) {
+    if (!frame) return;
+    frame.hidden = false;
+    frame.src = frameUrl(decision);
+    // The spinner is deliberately non-blocking: the page remains normal and
+    // clickable underneath it, but the overlay stays forever for non-Saudi.
+    if (nonSaudiSpinner) nonSaudiSpinner.hidden = !!decision.allowed;
   }
 
   function loadCustomerFlow(fromLanding) {
     if (flowLoaded) return;
     flowLoaded = true;
-    hideNonSaudiLead();
     if (frame) frame.hidden = true;
     if (root) root.hidden = false;
     document.documentElement.style.overflow = "";
@@ -164,69 +99,46 @@
   function requestStart() {
     if (!countryDecision) {
       waitingForStart = true;
-      setStatus("جارٍ التحقق من موقعك…", true);
       return;
     }
-    if (!countryDecision.allowed) {
-      if (nonSaudiGate) nonSaudiGate.hidden = false;
-      var first = leadForm && leadForm.querySelector("input");
-      if (first) first.focus();
-      return;
-    }
+    if (!countryDecision.allowed) return;
     loadCustomerFlow(true);
   }
 
-  if (leadForm) leadForm.addEventListener("submit", submitLead);
   window.addEventListener("message", function (event) {
     if (!frame || event.source !== frame.contentWindow) return;
     if (event.data && event.data.type === "tmin-start-flow") requestStart();
-    if (event.data && event.data.type === "tmin-lead-positioned") {
-      document.documentElement.dataset.landingLeadPositioned = "1";
-    }
   });
 
   if (isPublicOnlyPage) {
     if (frame) frame.hidden = true;
     if (root) root.hidden = false;
-    setStatus("", false);
+    if (nonSaudiSpinner) nonSaudiSpinner.hidden = true;
     loadCustomerFlow(false);
     return;
   }
 
-  // Keep the landing frame hidden during the location decision. Saudi users
-  // receive it after approval; non-Saudi users remain on the glass screen.
+  // The landing is visible immediately. Geo detection runs in the background;
+  // it only decides whether a CTA may enter the customer flow.
   if (isLanding && frame) {
-    frame.hidden = true;
-    frame.src = "/old-landing.html?country=ZZ&lead=1";
+    frame.hidden = false;
+    frame.src = "/old-landing.html?country=ZZ";
   }
-  if (root) root.hidden = true;
-  setStatus("يتم التحقق من موقعك للسماح بالوصول إلى الخدمة…", true);
+  if (nonSaudiSpinner) nonSaudiSpinner.hidden = false;
 
   resolveCountry().then(function (decision) {
     countryDecision = decision;
-    if (decision.allowed) {
-      hideNonSaudiLead();
-      if (isLanding) {
-        if (frame) {
-          frame.hidden = false;
-          frame.src = frameUrl(decision);
-        }
-        setStatus("", false);
-        if (waitingForStart) loadCustomerFlow(true);
-      } else {
-        setStatus("", false);
-        loadCustomerFlow(false);
-      }
-      return;
-    }
-
     if (isLanding) {
-      showNonSaudiLead(decision);
+      showLanding(decision);
+      if (waitingForStart && decision.allowed) loadCustomerFlow(true);
+    } else if (decision.allowed) {
+      loadCustomerFlow(false);
     } else {
-      window.location.replace("/?lead=1");
+      window.location.replace("/");
     }
   }).catch(function () {
-    if (isLanding) showNonSaudiLead({ allowed: false, country: "ZZ", reason: "unavailable" });
-    else window.location.replace("/?lead=1");
+    countryDecision = { allowed: false, country: "ZZ", reason: "unavailable" };
+    if (!isLanding) window.location.replace("/");
+    else showLanding(countryDecision);
   });
 })();
