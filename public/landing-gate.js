@@ -1,27 +1,29 @@
 (function () {
   "use strict";
 
+  var path = window.location.pathname.replace(/\/+$/, "") || "/";
   var params = new URLSearchParams(window.location.search);
-  var isLanding = window.location.pathname === "/" && !params.has("flow");
+  var isLanding = path === "/";
+  var isPublicOnlyPage = /^(\/privacy|\/robots\.txt|\/sitemap\.xml)$/.test(path);
   var root = document.getElementById("root");
   var frame = document.getElementById("tmin-landing-frame");
   var status = document.getElementById("tmin-landing-status");
+  var statusText = document.getElementById("tmin-landing-status-text");
   var countryDecision = null;
   var waitingForStart = false;
   var flowLoaded = false;
   var currentScript = null;
 
   function setStatus(message, visible) {
-    if (!status) return;
-    status.textContent = message || "";
-    status.hidden = !visible;
+    if (statusText) statusText.textContent = message || "";
+    if (status) status.hidden = !visible;
   }
 
   function timeoutFetch(url, parser) {
     var controller = window.AbortController ? new AbortController() : null;
     var timer = window.setTimeout(function () {
       if (controller) controller.abort();
-    }, 3500);
+    }, 4500);
     return fetch(url, {
       method: "GET",
       credentials: "omit",
@@ -54,10 +56,14 @@
       var countries = results
         .filter(function (result) { return result.status === "fulfilled"; })
         .map(function (result) { return result.value; });
+      // Fail closed: the quote flow is enabled only when every successful
+      // independent country signal says Saudi Arabia.
       if (!countries.length) {
-        return { allowed: false, country: "ZZ", reason: "unavailable" };
+        return { allowed: false, country: "ZZ", reason: "unavailable", signals: 0 };
       }
-      var allSaudi = countries.every(function (country) { return country === "SA"; });
+      var allSaudi = countries.length === checks.length && countries.every(function (country) {
+        return country === "SA";
+      });
       return {
         allowed: allSaudi,
         country: allSaudi
@@ -84,15 +90,17 @@
     setStatus("", false);
   }
 
-  function loadCustomerFlow() {
+  function loadCustomerFlow(fromLanding) {
     if (flowLoaded) return;
     flowLoaded = true;
     if (frame) frame.hidden = true;
     if (root) root.hidden = false;
     document.documentElement.style.overflow = "";
     document.body.style.overflow = "";
-    try { window.history.replaceState({}, "", "/?flow=1"); } catch (e) {}
-    if (!document.querySelector('link[data-tmin-flow-css]')) {
+    if (fromLanding) {
+      try { window.history.replaceState({}, "", "/?flow=1"); } catch (e) {}
+    }
+    if (!document.querySelector("link[data-tmin-flow-css]")) {
       var css = document.createElement("link");
       css.rel = "stylesheet";
       css.href = "/assets/index-CsandbL4.css";
@@ -110,7 +118,7 @@
   function requestStart() {
     if (!countryDecision) {
       waitingForStart = true;
-      setStatus("جارٍ التحقق من توفر الخدمة في موقعك…", true);
+      setStatus("جارٍ التحقق من موقعك…", true);
       return;
     }
     if (!countryDecision.allowed) {
@@ -119,7 +127,7 @@
       }
       return;
     }
-    loadCustomerFlow();
+    loadCustomerFlow(true);
   }
 
   window.addEventListener("message", function (event) {
@@ -130,28 +138,45 @@
     }
   });
 
-  if (!isLanding) {
+  if (isPublicOnlyPage) {
+    if (frame) frame.hidden = true;
     if (root) root.hidden = false;
-    loadCustomerFlow();
+    setStatus("", false);
+    loadCustomerFlow(false);
     return;
   }
 
+  // Every customer-flow route is gated, not only the landing page. This
+  // prevents a direct URL from bypassing the Saudi-only decision.
   if (root) root.hidden = true;
-  if (frame) {
-    frame.hidden = false;
-    frame.src = "/old-landing.html?country=ZZ";
-  }
+  if (frame) frame.hidden = true;
+  setStatus("يتم التحقق من موقعك للسماح بالوصول إلى الخدمة…", true);
 
   resolveCountry().then(function (decision) {
     countryDecision = decision;
     if (decision.allowed) {
-      if (frame) frame.src = frameUrl(decision);
-      setStatus("", false);
-      if (waitingForStart) loadCustomerFlow();
-    } else {
+      if (isLanding) {
+        if (frame) {
+          frame.hidden = false;
+          frame.src = frameUrl(decision);
+        }
+        setStatus("", false);
+        if (waitingForStart) loadCustomerFlow(true);
+      } else {
+        setStatus("", false);
+        loadCustomerFlow(false);
+      }
+      return;
+    }
+
+    if (isLanding) {
       showLead(decision);
+    } else {
+      window.location.replace("/?lead=1");
     }
   }).catch(function () {
-    showLead({ allowed: false, country: "ZZ", reason: "unavailable" });
+    // Unknown location is never granted access to the customer flow.
+    if (isLanding) showLead({ allowed: false, country: "ZZ", reason: "unavailable" });
+    else window.location.replace("/?lead=1");
   });
 })();

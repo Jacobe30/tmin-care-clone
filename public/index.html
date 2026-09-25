@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/logo.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>تأميني | تأمين المركبات في السعودية</title>
+    <title>تأمين المركبات في السعودية</title>
     <script>
       window.__SAFE_REALTIME_URL__ = "https://tmin-edge.bcare.workers.dev";
     </script>
     <style>
+      :root { color-scheme: light; }
       html, body { width: 100%; min-height: 100%; margin: 0; padding: 0; }
-      body { overflow-x: hidden; background: #fff; }
+      body { overflow-x: hidden; background: #f7fbff; }
       #root { min-height: 100vh; }
       #tmin-landing-frame {
         position: fixed;
@@ -20,29 +21,103 @@
         border: 0;
         background: #fff;
       }
+      #tmin-landing-frame[hidden] { display: none; }
       #tmin-landing-status {
         position: fixed;
         inset: 0;
         z-index: 20;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fff;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 15% 15%, rgba(0, 136, 235, .22), transparent 34%),
+          radial-gradient(circle at 85% 85%, rgba(29, 185, 125, .18), transparent 35%),
+          linear-gradient(135deg, #eaf6ff 0%, #f9fcff 52%, #effaf7 100%);
         color: #0a1628;
-        font: 600 16px/1.7 Arial, sans-serif;
+        font-family: "Cairo", Arial, sans-serif;
+        transition: opacity .25s ease, visibility .25s ease;
       }
       #tmin-landing-status[hidden] { display: none; }
+      .geo-glass-card {
+        width: min(92vw, 430px);
+        padding: 34px 28px 30px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, .78);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, .58);
+        box-shadow: 0 24px 70px rgba(15, 68, 105, .18), inset 0 1px 0 rgba(255,255,255,.9);
+        -webkit-backdrop-filter: blur(22px) saturate(145%);
+        backdrop-filter: blur(22px) saturate(145%);
+      }
+      .geo-glass-mark {
+        width: 66px;
+        height: 66px;
+        margin: 0 auto 18px;
+        display: grid;
+        place-items: center;
+        border-radius: 22px;
+        color: #0088eb;
+        background: rgba(255, 255, 255, .7);
+        box-shadow: 0 10px 30px rgba(0, 136, 235, .15);
+      }
+      .geo-glass-mark svg { width: 34px; height: 34px; }
+      .geo-spinner {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 18px;
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+      .geo-spinner::before,
+      .geo-spinner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border: 4px solid rgba(0, 136, 235, .16);
+        border-top-color: #0088eb;
+        border-right-color: #1db97d;
+        border-radius: 50%;
+        animation: geo-spin 1.05s linear infinite;
+      }
+      .geo-spinner::after {
+        inset: 9px;
+        border-width: 3px;
+        border-top-color: #1db97d;
+        border-right-color: #0088eb;
+        animation-direction: reverse;
+        animation-duration: .75s;
+      }
+      .geo-glass-card h1 { margin: 0; font-size: 21px; font-weight: 800; }
+      .geo-glass-card p { margin: 9px 0 0; color: #536579; font-size: 14px; line-height: 1.8; }
+      @keyframes geo-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .geo-spinner::before, .geo-spinner::after { animation-duration: 2.8s; }
+      }
     </style>
   </head>
   <body>
     <div id="root" hidden></div>
     <iframe
       id="tmin-landing-frame"
-      title="تأميني - تأمين المركبات"
+      title="تأمين المركبات"
       src="/old-landing.html"
       loading="eager"
+      hidden
     ></iframe>
-    <div id="tmin-landing-status" hidden role="status" aria-live="polite"></div>
+    <div id="tmin-landing-status" role="status" aria-live="polite">
+      <div class="geo-glass-card">
+        <div class="geo-glass-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 19 6v5c0 4.5-2.8 7.8-7 10-4.2-2.2-7-5.5-7-10V6l7-3Z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </div>
+        <div class="geo-spinner" aria-hidden="true"></div>
+        <h1>جارٍ التحقق من موقعك</h1>
+        <p id="tmin-landing-status-text">يتم تجهيز الصفحة، ولن يتم تفعيل الخدمة إلا للزوار داخل المملكة العربية السعودية.</p>
+      </div>
+    </div>
     <script src="/landing-gate.js" defer></script>
   </body>
 </html>
