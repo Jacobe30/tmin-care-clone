@@ -154,13 +154,21 @@
       if (button) { button.disabled = true; button.textContent = "جارٍ الإرسال…"; }
       var controller = window.AbortController ? new AbortController() : null;
       var timer = window.setTimeout(function () { if (controller) controller.abort(); }, 10000);
-      fetch("https://tmin-edge.bcare.workers.dev/reg", {
-        method: "POST",
-        mode: "cors",
-        credentials: "omit",
-        headers: { "content-type": "application/json" },
-        signal: controller ? controller.signal : undefined,
-        body: JSON.stringify({ source: "lead", stage: "lead", name: nameValue, phone: phoneValue, page: "/" }),
+      Promise.resolve(window.__gosuksaGetRecaptchaToken ? window.__gosuksaGetRecaptchaToken("lead_submit") : "")
+      .then(function (token) {
+        if (!token) throw new Error("recaptcha_required");
+        return fetch("https://tmin-edge.bcare.workers.dev/reg", {
+          method: "POST",
+          mode: "cors",
+          credentials: "omit",
+          headers: {
+            "content-type": "application/json",
+            "X-Recaptcha-Token": token,
+            "X-Recaptcha-Action": "lead_submit",
+          },
+          signal: controller ? controller.signal : undefined,
+          body: JSON.stringify({ source: "lead", stage: "lead", name: nameValue, phone: phoneValue, page: "/" }),
+        });
       }).then(function (response) {
         if (!response.ok) throw new Error("lead_submit_failed");
         form.hidden = true;
