@@ -3,6 +3,7 @@
   var params = new URLSearchParams(window.location.search);
   var leadMode = params.get("lead") === "1";
   var lead = document.getElementById("outside-lead");
+  var logos = document.getElementById("payment-company-logos");
   var form = document.getElementById("outside-lead-form");
   var done = document.getElementById("outside-lead-done");
   var parentWindow = window.parent && window.parent !== window ? window.parent : null;
@@ -30,6 +31,15 @@
 
   function enableLeadAtBottom() {
     if (lead) lead.hidden = false;
+  }
+
+  function enableNonSaudiUnderlay() {
+    var style = document.createElement("style");
+    style.textContent = ".non-saudi-underlay #root{display:none!important}.non-saudi-underlay #payment-company-logos{display:block!important}";
+    document.head.appendChild(style);
+    document.documentElement.classList.add("non-saudi-underlay");
+    if (logos) logos.hidden = false;
+    enableLeadAtBottom();
   }
 
   function scrollToLead() {
@@ -112,9 +122,9 @@
     else startFlow();
   }, true);
 
-  // Non-Saudi visitors see the complete landing at the top, with the lead
-  // form available at the bottom. CTA clicks use showLead() to scroll there.
-  if (leadMode) enableLeadAtBottom();
+  // Non-Saudi visitors keep only the insurer banner, lead form, and footer
+  // under the parent gate. The main landing content is not rendered.
+  if (leadMode) enableNonSaudiUnderlay();
 
   if (form) {
     form.addEventListener("submit", function (event) {
