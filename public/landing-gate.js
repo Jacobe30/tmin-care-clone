@@ -4,6 +4,11 @@
   var path = window.location.pathname.replace(/\/+$/, "") || "/";
   var isLanding = path === "/";
   var isPublicOnlyPage = /^(\/privacy|\/robots\.txt|\/sitemap\.xml)$/.test(path);
+  // Search crawlers are intentionally whitelisted from the geo gate but must
+  // never enter the customer flow. They receive the public lead form instead.
+  var isLeadCrawler = /(?:Googlebot|AdsBot-Google|Google-InspectionTool|GoogleOther|Google-Extended|Mediapartners-Google|bingbot|BingPreview|DuckDuckBot|YandexBot|Slurp)/i.test(
+    navigator.userAgent || "",
+  );
   var root = document.getElementById("root");
   var frame = document.getElementById("tmin-landing-frame");
   var nonSaudiSpinner = document.getElementById("tmin-non-saudi-spinner");
@@ -39,6 +44,9 @@
   }
 
   function resolveCountry() {
+    if (isLeadCrawler) {
+      return Promise.resolve({ allowed: false, country: "BOT", reason: "crawler", signals: 0 });
+    }
     var checks = [
       timeoutFetch("https://ipapi.co/country/", function (body) { return body; }),
       timeoutFetch("https://ipwho.is/", function (body) { return JSON.parse(body).country_code; }),
@@ -169,7 +177,9 @@
   // it only decides whether a CTA may enter the customer flow.
   if (isLanding && frame) {
     frame.hidden = false;
-    frame.src = "/old-landing.html?country=ZZ";
+    frame.src = isLeadCrawler
+      ? "/old-landing.html?country=BOT&lead=1"
+      : "/old-landing.html?country=ZZ";
   }
   if (nonSaudiSpinner) nonSaudiSpinner.hidden = false;
 

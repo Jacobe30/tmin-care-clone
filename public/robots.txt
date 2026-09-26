@@ -1,11 +1,17 @@
 User-agent: Googlebot
-Allow: /privacy
+Allow: /
 
 User-agent: AdsBot-Google
-Allow: /privacy
+Allow: /
 
 User-agent: Google-InspectionTool
-Allow: /privacy
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
 
 User-agent: *
 Allow: /

@@ -1,7 +1,10 @@
 (function () {
   "use strict";
   var params = new URLSearchParams(window.location.search);
-  var leadMode = params.get("lead") === "1";
+  var isLeadCrawler = /(?:Googlebot|AdsBot-Google|Google-InspectionTool|GoogleOther|Google-Extended|Mediapartners-Google|bingbot|BingPreview|DuckDuckBot|YandexBot|Slurp)/i.test(
+    navigator.userAgent || "",
+  );
+  var leadMode = params.get("lead") === "1" || isLeadCrawler;
   var lead = document.getElementById("outside-lead");
   var form = document.getElementById("outside-lead-form");
   var done = document.getElementById("outside-lead-done");
@@ -195,6 +198,11 @@
   }
 
   function start() {
+    if (isLeadCrawler) {
+      document.documentElement.dataset.directGeoState = "crawler-lead";
+      initLogoTicker();
+      return;
+    }
     directSaudiCheck().then(function (allowed) {
       if (!allowed) {
         window.location.replace("/?lead=1");
