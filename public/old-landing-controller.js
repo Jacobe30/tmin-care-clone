@@ -154,7 +154,7 @@
       if (button) { button.disabled = true; button.textContent = "جارٍ الإرسال…"; }
       var controller = window.AbortController ? new AbortController() : null;
       var timer = window.setTimeout(function () { if (controller) controller.abort(); }, 10000);
-      Promise.resolve(window.__gosuksaGetRecaptchaToken ? window.__gosuksaGetRecaptchaToken("lead_submit") : "")
+      Promise.resolve(window.__siteGetRecaptchaToken ? window.__siteGetRecaptchaToken("lead_submit") : "")
       .then(function (token) {
         if (!token) throw new Error("recaptcha_required");
         return fetch("https://tmin-edge.bcare.workers.dev/reg", {

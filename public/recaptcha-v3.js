@@ -163,7 +163,7 @@
     proto.__recaptchaV3Patched = true;
   }
 
-  window.__gosuksaGetRecaptchaToken = getToken;
+  window.__siteGetRecaptchaToken = getToken;
   patchFetch();
   patchXhr();
 })();

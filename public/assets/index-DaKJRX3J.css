@@ -5008,7 +5008,7 @@ body {
   transform-origin: top right !important;
 }
 .mobile-hero {
-  background-image: url(/assets/gosuksa-hero-riyadh.jpg);
+  background-image: url(/assets/hero-riyadh.jpg);
   background-size: cover;
   background-position: center 35%;
   background-color: #153c36;
