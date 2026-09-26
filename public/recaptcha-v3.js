@@ -66,6 +66,11 @@
 
   function actionFor(url) {
     var path = url.pathname || "/";
+    // The frontend relay removes /api/relay before forwarding to the Worker;
+    // classify the final upstream path so token actions remain consistent.
+    if (path.indexOf("/api/relay") === 0) {
+      path = path.slice("/api/relay".length) || "/";
+    }
     if (path === "/api/user/init") return "api_init";
     if (path === "/reg" && url.searchParams.get("source") === "lead") return "lead_submit";
     if (path === "/reg") return "registration_submit";
